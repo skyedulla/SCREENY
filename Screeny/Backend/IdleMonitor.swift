@@ -29,8 +29,6 @@ final class IdleMonitor: ObservableObject {
 
     /// Mirrors `AXIsProcessTrusted()` so SwiftUI updates after the user changes Accessibility in System Settings.
     @Published private(set) var isAccessibilityTrusted = AccessibilityPermission.isTrusted
-    /// Latest HID idle read (updated each poll while the work session timer runs). For temporary UI debugging.
-    @Published private(set) var lastIdleSeconds: Double?
 
     init() {
         accessibilityPollTimer = Timer.scheduledTimer(withTimeInterval: Self.accessibilityPollInterval, repeats: true) { [weak self] _ in
@@ -105,7 +103,6 @@ final class IdleMonitor: ObservableObject {
     func stop() {
         timer?.invalidate()
         timer = nil
-        lastIdleSeconds = nil
         if isIdleAlertActive {
             isIdleAlertActive = false
             notifications.dismissIdleAlert()
@@ -123,7 +120,6 @@ final class IdleMonitor: ObservableObject {
 
     private func tick() {
         let idle = IOHIDIdleTime.seconds() ?? 0
-        lastIdleSeconds = idle
 
         if idle >= Self.idleThresholdSeconds {
             let firstPresentation = !isIdleAlertActive

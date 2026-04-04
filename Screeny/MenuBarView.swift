@@ -12,34 +12,8 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Screeny")
+            Text("SCREENY")
                 .font(.headline)
-            Text("You’ll get a notification after 15 seconds without cursor movement. The menu is only for settings and quitting.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            // TEMP: remove after idle + notification test
-            Group {
-                Divider()
-                Text("Idle debug (remove later)")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                if let idle = idleMonitor.lastIdleSeconds {
-                    LabeledContent("HID idle") {
-                        Text(String(format: "%.2f s", idle)).monospacedDigit()
-                    }
-                    .font(.caption)
-                    LabeledContent("Countdown to alert") {
-                        Text(String(format: "%.2f s", max(0, IdleMonitor.idleThresholdSeconds - idle))).monospacedDigit()
-                    }
-                    .font(.caption)
-                } else {
-                    Text("No samples (work session off)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
 
             Divider()
 
@@ -49,6 +23,11 @@ struct MenuBarView: View {
                 Text(isWorkSessionActive ? "End Work Session" : "Start Work Session")
             }
             .buttonStyle(.borderless)
+
+            Text("Once you start a work session, you'll get a notification after 15 seconds without cursor movement.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
             Divider()
 
@@ -76,7 +55,7 @@ struct MenuBarView: View {
 
             Divider()
 
-            Button("Quit Screeny") {
+            Button("Quit SCREENY") {
                 NSApplication.shared.terminate(nil)
             }
         }
