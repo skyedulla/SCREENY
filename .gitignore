@@ -1,0 +1,6 @@
+build/
+.DS_Store
+*.xcuserstate
+xcuserdata/
+DerivedData/
+Tools/idle_countdown
