@@ -63,6 +63,10 @@ struct MenuBarView: View {
         .frame(minWidth: 280)
         .onAppear {
             idleMonitor.refreshAccessibilityStatus()
+            // `onChange` does not run for the initial value; sync session-on with the timer if bootstrap already ran.
+            if isWorkSessionActive {
+                idleMonitor.start()
+            }
         }
         .onChange(of: isWorkSessionActive) { _, active in
             if active {

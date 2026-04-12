@@ -24,8 +24,8 @@ final class IdleMonitor: ObservableObject {
     private var timer: Timer?
     private var accessibilityPollTimer: Timer?
     private let notifications = NotificationController()
-    /// Observer token; touched from MainActor and `deinit` (nonisolated), hence `unsafe`.
-    nonisolated(unsafe) private var didFinishLaunchingObserver: NSObjectProtocol?
+    /// Ensures `bootstrapAfterLaunch()` runs once even if `didFinishLaunching` posted before our observer existed.
+    private var didBootstrapAfterLaunch = false
 
     /// Mirrors `AXIsProcessTrusted()` so SwiftUI updates after the user changes Accessibility in System Settings.
     @Published private(set) var isAccessibilityTrusted = AccessibilityPermission.isTrusted
@@ -44,8 +44,9 @@ final class IdleMonitor: ObservableObject {
             self?.refreshAccessibilityStatus()
         }
 
-        // `MenuBarExtra` content (and its `.task`) can load lazily; notification auth + idle polling must run at launch.
-        didFinishLaunchingObserver = NotificationCenter.default.addObserver(
+        // `didFinishLaunching` often fires before `IdleMonitor` exists (SwiftUI `@StateObject` init order),
+        // so relying only on `NotificationCenter` misses bootstrap and the idle timer never starts.
+        NotificationCenter.default.addObserver(
             forName: NSApplication.didFinishLaunchingNotification,
             object: nil,
             queue: .main
@@ -54,11 +55,10 @@ final class IdleMonitor: ObservableObject {
                 await self?.bootstrapAfterLaunch()
             }
         }
-    }
-
-    deinit {
-        if let didFinishLaunchingObserver {
-            NotificationCenter.default.removeObserver(didFinishLaunchingObserver)
+        DispatchQueue.main.async { [weak self] in
+            Task { @MainActor in
+                await self?.bootstrapAfterLaunch()
+            }
         }
     }
 
@@ -71,6 +71,9 @@ final class IdleMonitor: ObservableObject {
     }
 
     private func bootstrapAfterLaunch() async {
+        guard !didBootstrapAfterLaunch else { return }
+        didBootstrapAfterLaunch = true
+
         await prepareNotifications()
         if Self.isWorkSessionEnabledInDefaults() {
             start()
