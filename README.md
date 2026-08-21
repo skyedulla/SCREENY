@@ -6,4 +6,4 @@ your OS will push a notification if you haven't moved your touchpad/mouse/keyboa
 with focus & concentration problems. 
 
 
-Tech Stack
+Tech Stack: Built with Swift and SwiftUI for a native macOS menu bar interface. Low-level system activity is tracked using CoreGraphics (CGEventSource) alongside macOS Accessibility APIs (AXIsProcessTrusted) to detect hardware idle time. Local desktop notifications are handled via the UserNotifications framework, integrated with AppKit for application lifecycle management.
